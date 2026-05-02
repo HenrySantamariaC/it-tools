@@ -1,0 +1,11 @@
+name: it-tools
+
+services:
+  it-tools:
+    build:
+      context: .
+      args:
+        BASE_PATH: ${BASE_PATH:-/}
+    ports:
+      - "8080:80"
+    restart: unless-stopped

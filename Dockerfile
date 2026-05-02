@@ -4,6 +4,11 @@ FROM node:lts-alpine AS build-stage
 ENV NPM_CONFIG_LOGLEVEL warn
 ENV CI true
 WORKDIR /app
+
+# Build argument for base URL (e.g., tools, my-app, leave empty for root)
+ARG BASE_URL=
+ENV BASE_URL=/${BASE_URL}
+
 COPY package.json pnpm-lock.yaml ./
 RUN npm install -g pnpm && pnpm i --frozen-lockfile
 COPY . .
@@ -12,6 +17,6 @@ RUN pnpm build
 # production stage
 FROM nginx:stable-alpine AS production-stage
 COPY --from=build-stage /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY --chmod=644 --from=build-stage /app/nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
